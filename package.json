@@ -1,0 +1,23 @@
+{
+  "name": "grafine",
+  "version": "1.0.0",
+  "description": ":lollipop: A tiny nodejs/javascript in memory graph database",
+  "main": "src/index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/glayzzle/grafine.git"
+  },
+  "keywords": [
+    "graph",
+    "database"
+  ],
+  "author": "Ioan CHIRIAC",
+  "license": "BSD-3-Clause",
+  "bugs": {
+    "url": "https://github.com/glayzzle/grafine/issues"
+  },
+  "homepage": "https://github.com/glayzzle/grafine#readme"
+}
