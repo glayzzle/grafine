@@ -4,7 +4,8 @@
   "description": ":lollipop: A tiny nodejs/javascript in memory graph database",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "node node_modules/mocha/bin/_mocha test/*",
+    "cover": "node --stack-size=5000 node_modules/istanbul/lib/cli.js cover node_modules/mocha/bin/_mocha -- test/*"
   },
   "repository": {
     "type": "git",
@@ -19,5 +20,11 @@
   "bugs": {
     "url": "https://github.com/glayzzle/grafine/issues"
   },
-  "homepage": "https://github.com/glayzzle/grafine#readme"
+  "homepage": "https://github.com/glayzzle/grafine#readme",
+  "devDependencies": {
+    "coveralls": "^2.11.16",
+    "istanbul": "^0.4.5",
+    "mocha": "^3.2.0",
+    "should": "^11.2.0"
+  }
 }
