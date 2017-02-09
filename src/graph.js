@@ -34,7 +34,30 @@ graph.prototype.create = function(result) {
     this.length ++;
     return result;
 };
-
+/**
+ * Cleanup gaps
+ */
+graph.prototype.reindex = function(criteria) {
+  var index = {};
+  this.points = this.points.filter(function(item) {
+      if (item != undefined) {
+          for(var i = 0; i < item.indexes.length; i++) {
+              var key = item.indexes[i];
+              if (!(key[0] in index)) {
+                  index[key[0]] = {};
+              }
+              if (!(key[1] in index[key[0]])) {
+                  index[key[0]][key[1]] = [];
+              }
+              index[key[0]][key[1]].push(item);
+          };
+          return true;
+      }
+      return false;
+  });
+  this.index = index;
+  return this;
+};
 /**
  * Proceed to a multicriteria search
  */

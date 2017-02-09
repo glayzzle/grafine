@@ -43,10 +43,31 @@ elapsed_time('Create ' + size +  ' items', size);
 
 // deleting items
 var records = 10000;
-for(var i = 0; i < records; i++) {
-    db.points[i].delete();
+for(var x = 0; x < 5; x++) {
+  for(var i = 0; i < records; i++) {
+      db.points[i * 40].delete();
+  }
+  elapsed_time(x + '. Deleted ' + records +  ' items', records);
+  for(var i = 0; i < records; i++) {
+      var node = db.create();
+      node.index('name', i % 30);
+      node.index('type', i % 60);
+      if (i % 5 === 0) {
+          if (last) {
+              node.set('foo', last);
+              node.set('bar', last);
+              node.add('baz', last);
+          }
+      }
+      if (i % 10 === 0) last = node;
+  }
+  // check memory liberation
+  elapsed_time(x + '. Create ' + records +  ' items', records);
+
+  // rebuild index
+  db.reindex();
+  elapsed_time(x + '. --> Reindex ' + db.points.length +  ' items', db.length);
 }
-elapsed_time('Deleted ' + records +  ' items', records);
 
 // searching tests
 var search = 10;

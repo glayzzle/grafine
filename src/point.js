@@ -71,7 +71,7 @@ point.prototype.delete = function() {
         var index = this.indexes[i];
         var id = this.graph.index[index[0]][index[1]].indexOf(this);
         if (id !== -1) {
-            this.graph.index[index[0]][index[1]] = null;
+            this.graph.index[index[0]][index[1]][id] = null;
         }
     }
     // removes from graph
@@ -95,24 +95,17 @@ point.prototype.index = function(name, value) {
         this.graph.index[name][value] = [];
     }
     this.graph.index[name][value].push(this);
-};
-
-/**
- * Related objects
- */
-point.prototype.link = function(property, object) {
-    if(!(property in this.related)) {
-        this.related[property] = [];
-    }
-    this.related[property].push(object);
-    return this;
+    this.indexes.push([name, value]);
 };
 
 /**
  * Creates a relation to the specified object
  */
 point.prototype.set = function(property, object) {
-    object.link(property, this);
+    if(!(property in object.related)) {
+        object.related[property] = [];
+    }
+    object.related[property].push(this);
     if (property in this.properties) {
         // already exists, so cleanup
         var relations = this.properties[property];
@@ -133,7 +126,10 @@ point.prototype.set = function(property, object) {
  * Add a new relation to the specified object
  */
 point.prototype.add = function(property, object) {
-    object.link(property, this);
+    if(!(property in object.related)) {
+        object.related[property] = [];
+    }
+    object.related[property].push(this);
     if (!(property in this.properties)) {
         this.properties[property] = [];
     } else if (!('length' in this.properties[property])) {
