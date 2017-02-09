@@ -94,7 +94,6 @@ point.prototype.index = function(name, value) {
         this.graph.index[name][value] = [];
     }
     this.graph.index[name][value].push(this);
-    this.indexes.push([name, value]);
 };
 
 /**
@@ -103,7 +102,7 @@ point.prototype.index = function(name, value) {
 point.prototype.link = function(property, object) {
     if(!(property in this.related)) {
         this.related[property] = [];
-    } 
+    }
     this.related[property].push(object);
     return this;
 };
@@ -163,7 +162,7 @@ point.prototype.first = function(property) {
     if (Array.isArray(items)) {
         if (items.length > 0) {
             return items[0];
-        } 
+        }
         return null;
     }
     return items;
