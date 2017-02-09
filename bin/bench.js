@@ -45,7 +45,7 @@ elapsed_time('Create ' + size +  ' items', size);
 var records = 10000;
 for(var x = 0; x < 2; x++) {
   for(var i = 0; i < records; i++) {
-      db.points[i * 20].delete();
+      db.points[i * (size / records)].delete();
   }
   elapsed_time(x + '. Deleted ' + records +  ' items', records);
   for(var i = 0; i < records; i++) {
