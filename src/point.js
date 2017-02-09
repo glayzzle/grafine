@@ -71,14 +71,15 @@ point.prototype.delete = function() {
         var index = this.indexes[i];
         var id = this.graph.index[index[0]][index[1]].indexOf(this);
         if (id !== -1) {
-            this.graph.index[index[0]][index[1]].splice(id, 1);
+            this.graph.index[index[0]][index[1]] = null;
         }
     }
     // removes from graph
     var id = this.graph.points.indexOf(this);
     if (id !== -1) {
-        this.graph.points.splice(id, 1);
+        this.graph.points[id] = null;
     }
+    this.graph.length --;
     return this;
 };
 

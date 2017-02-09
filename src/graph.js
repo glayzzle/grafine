@@ -13,14 +13,25 @@ var point = require('./point');
 var graph = function() {
     this.points = [];
     this.index = {};
+    this.length = 0;
+};
+
+/**
+ * Export all nodes as a plain object
+ */
+graph.prototype.export = function() {
+  var nodes = [];
 };
 
 /**
  * Create a node
  */
-graph.prototype.create = function() {
-    var result = new point(this); 
+graph.prototype.create = function(result) {
+    if (!result) {
+      result = new point(this);
+    }
     this.points.push(result);
+    this.length ++;
     return result;
 };
 
@@ -48,7 +59,9 @@ graph.prototype.search = function(criteria) {
         } else return []; // nobody matches
     }
     if (results.length === 1) {
-        return results[0];
+        return results[0].filter(function(item) {
+          return item != undefined;
+        });
     }
     // intersect results (quick & dirty / may improve)
     var data = [];
@@ -57,6 +70,7 @@ graph.prototype.search = function(criteria) {
         for(var i = 0, size = set.length; i < size; i++) {
             var miss = false;
             var item = set[i];
+            if (!item) continue;
             // scan other sets to check if exists
             for(var j = 0; j < results.length; j++) {
                 if (j !== s && results[j].indexOf(item) === -1) {

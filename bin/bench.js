@@ -41,6 +41,13 @@ for(var i = 0; i < size; i++) {
 }
 elapsed_time('Create ' + size +  ' items', size);
 
+// deleting items
+var records = 10000;
+for(var i = 0; i < records; i++) {
+    db.points[i].delete();
+}
+elapsed_time('Deleted ' + records +  ' items', records);
+
 // searching tests
 var search = 10;
 var records = 0;
@@ -52,10 +59,3 @@ for(var i = 0; i < search; i++) {
     records += found.length;
 }
 elapsed_time('Found ' + records +  ' items', records);
-
-// searching tests
-var records = 1000;
-for(var i = 0; i < records; i++) {
-    db.points[0].delete();
-}
-elapsed_time('Deleted ' + records +  ' items', records);
