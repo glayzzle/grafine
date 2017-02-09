@@ -17,6 +17,32 @@ var point = function(graph) {
 };
 
 /**
+ * Exports the point
+ */
+point.prototype.export = function() {
+    var result = {
+        _p: {},
+        _i: this.indexes
+    };
+    for(var k in this.properties) {
+        var relations = this.properties[k];
+        if ('length' in relations) {
+          if (relations.length > 0) {
+              result._p[k] = [];
+              for(var i = 0; i < relations.length; i++) {
+                  result._p[k].push(
+                      this.graph.points.indexOf(relations[i])
+                  );
+              }
+          }
+        } else {
+            result._p[k] = this.graph.points.indexOf(relations);
+        }
+    }
+    return result;
+};
+
+/**
  * Just deletes a property
  */
 point.prototype.remove = function(property) {
@@ -80,6 +106,7 @@ point.prototype.delete = function() {
         this.graph.points[id] = null;
     }
     this.graph.length --;
+    this.graph.gaps ++;
     return this;
 };
 

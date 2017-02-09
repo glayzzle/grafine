@@ -14,13 +14,19 @@ var graph = function() {
     this.points = [];
     this.index = {};
     this.length = 0;
+    this.gaps = 0;
 };
 
 /**
  * Export all nodes as a plain object
  */
 graph.prototype.export = function() {
-  var nodes = [];
+    this.reindex();
+    var nodes = [];
+    for(var i = 0; i < this.points.length; i++) {
+        nodes.push(this.points[i].export());
+    }
+    return nodes;
 };
 
 /**
@@ -28,7 +34,7 @@ graph.prototype.export = function() {
  */
 graph.prototype.create = function(result) {
     if (!result) {
-      result = new point(this);
+        result = new point(this);
     }
     this.points.push(result);
     this.length ++;
@@ -37,7 +43,8 @@ graph.prototype.create = function(result) {
 /**
  * Cleanup gaps
  */
-graph.prototype.reindex = function(criteria) {
+graph.prototype.reindex = function() {
+  if (this.gaps === 0) return this;
   var index = {};
   this.points = this.points.filter(function(item) {
       if (item != undefined) {
@@ -56,6 +63,7 @@ graph.prototype.reindex = function(criteria) {
       return false;
   });
   this.index = index;
+  this.gaps = 0;
   return this;
 };
 /**

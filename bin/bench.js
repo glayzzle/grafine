@@ -43,9 +43,9 @@ elapsed_time('Create ' + size +  ' items', size);
 
 // deleting items
 var records = 10000;
-for(var x = 0; x < 5; x++) {
+for(var x = 0; x < 2; x++) {
   for(var i = 0; i < records; i++) {
-      db.points[i * 40].delete();
+      db.points[i * 20].delete();
   }
   elapsed_time(x + '. Deleted ' + records +  ' items', records);
   for(var i = 0; i < records; i++) {
@@ -80,3 +80,8 @@ for(var i = 0; i < search; i++) {
     records += found.length;
 }
 elapsed_time('Found ' + records +  ' items', records);
+var data = db.export();
+elapsed_time('Export ' + data.length +  ' items', data.length);
+console.log('Estimated size', Math.round(
+  JSON.stringify(data).length / 1024 / 1024
+), 'Mb');
