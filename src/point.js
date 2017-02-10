@@ -30,13 +30,13 @@ point.prototype.export = function() {
           if (relations.length > 0) {
               result._p[k] = [];
               for(var i = 0; i < relations.length; i++) {
-                  result._p[k].push(
-                      this.graph.points.indexOf(relations[i])
-                  );
+                  var id = this.graph.points.indexOf(relations[i]);
+                  if (id !== -1) result._p[k].push(id);
               }
           }
         } else {
-            result._p[k] = this.graph.points.indexOf(relations);
+            var id = this.graph.points.indexOf(relations);
+            if (id !== -1) result._p[k] = id;
         }
     }
     return result;

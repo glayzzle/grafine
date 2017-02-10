@@ -13,13 +13,11 @@ var elapsed_time = function(note, counter){
     // divide by a million to get nano to milli
     var elapsed = (new Date().getTime()) - start;
     var mem = process.memoryUsage();
-    console.log(
-        note + ' in ' + elapsed + "ms / memory " +
-        Math.round(mem.heapUsed / 1024 / 1024) + 'Mb'
-    );
+    note += '\tin\t' + elapsed + "ms \t" + Math.round(mem.heapUsed / 1024 / 1024) + 'Mb';
     if (counter) {
-        console.log('Speed : ' + Math.round(counter / elapsed * 1000) + '/sec');
+        note += '\t' + Math.round(counter / elapsed * 1000) + '/sec';
     }
+    console.log(note);
     start = (new Date().getTime()); // reset the timer
 };
 
@@ -66,7 +64,7 @@ for(var x = 0; x < 2; x++) {
 
   // rebuild index
   db.reindex();
-  elapsed_time(x + '. --> Reindex ' + db.points.length +  ' items', db.length);
+  elapsed_time(x + '. Reindex ' + db.points.length +  ' items', db.length);
 }
 
 // searching tests
@@ -82,6 +80,21 @@ for(var i = 0; i < search; i++) {
 elapsed_time('Found ' + records +  ' items', records);
 var data = db.export();
 elapsed_time('Export ' + data.length +  ' items', data.length);
+db.import(data);
+elapsed_time('Import ' + db.length +  ' items', db.length);
+// searching tests
+search = 10;
+records = 0;
+for(var i = 0; i < search; i++) {
+    var found = db.search({
+        name: i % 30,
+        type: i % 60
+    });
+    records += found.length;
+}
+elapsed_time('Found ' + records +  ' items', records);
+
+console.log('---------------------------');
 console.log('Estimated size', Math.round(
-  JSON.stringify(data).length / 1024 / 1024
-), 'Mb');
+  JSON.stringify(data).length / 1024 / 1024 * 10
+) / 10, 'Mb\n');

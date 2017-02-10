@@ -30,6 +30,66 @@ graph.prototype.export = function() {
 };
 
 /**
+ * Importing all nodes
+ */
+graph.prototype.import = function(points) {
+    // initialize the context
+    this.gaps = 0;
+    this.length = points.length;
+    this.points = [];
+    this.index = {};
+    // create points
+    for(var i = 0, size = this.length; i < size; i++) {
+        var node = this.factory(points[i]);
+        this.points.push(node);
+        // indexing
+        var indexes = points[i]._i;
+        for(var j = 0; j < indexes.length; j++) {
+            var index = indexes[j];
+            if (!(index[0] in this.index)) {
+                this.index[index[0]] = {};
+                this.index[index[0]][index[1]] = [];
+            } else if (!(index[1] in this.index[index[0]])) {
+                this.index[index[0]][index[1]] = [];
+            }
+            this.index[index[0]][index[1]].push(node);
+        }
+    }
+    // link points
+    for(var i = 0, size = this.length; i < size; i++) {
+        var props = points[i]._p;
+        for(var k in props) {
+            var relations = props[k];
+            if (typeof relations === 'number') {
+                this.points[i].properties[k] = this.points[relations];
+                if (!(k in this.points[relations].related)) {
+                    this.points[relations].related[k] = [];
+                }
+                this.points[relations].related[k].push(this.points[i]);
+            } else {
+                this.points[i].properties[k] = [];
+                for(var j = 0; j < relations.length; j++) {
+                    var target = this.points[relations[j]];
+                    this.points[i].properties[k].push(target);
+                    if (!(k in this.points[relations[j]].related)) {
+                        this.points[relations[j]].related[k] = [];
+                    }
+                    this.points[relations[j]].related[k].push(this.points[i]);
+                }
+            }
+        }
+    }
+
+    return this;
+};
+/**
+ * Factory function
+ */
+graph.prototype.factory = function(object) {
+    return new point(this);
+};
+
+/**
  * Create a node
  */
 graph.prototype.create = function(result) {
@@ -44,9 +104,9 @@ graph.prototype.create = function(result) {
  * Cleanup gaps
  */
 graph.prototype.reindex = function() {
-  if (this.gaps === 0) return this;
-  var index = {};
-  this.points = this.points.filter(function(item) {
+    if (this.gaps === 0) return this;
+    var index = {};
+    this.points = this.points.filter(function(item) {
       if (item != undefined) {
           for(var i = 0; i < item.indexes.length; i++) {
               var key = item.indexes[i];
@@ -61,10 +121,10 @@ graph.prototype.reindex = function() {
           return true;
       }
       return false;
-  });
-  this.index = index;
-  this.gaps = 0;
-  return this;
+    });
+    this.index = index;
+    this.gaps = 0;
+    return this;
 };
 /**
  * Proceed to a multicriteria search
