@@ -13,8 +13,9 @@ var index = require('./index');
  * Initialize a storage
  */
 var graph = function(hash) {
+    if (!hash) hash = 255;
     this.hash = hash;
-    this.uuid = 0;
+    this.nextId = 0;
     this.shards = [];
     this.indexes = [];
 };
@@ -23,7 +24,7 @@ var graph = function(hash) {
  * Generate a uuid (autoincrement)
  */
 graph.prototype.uuid = function() {
-    return ++this.uuid;
+    return ++this.nextId;
 };
 
 /**
@@ -49,12 +50,16 @@ graph.prototype.createShard = function(id) {
  */
 graph.prototype.getIndex = function(key) {
     var id = 0;
-    var size = key.length;
-    // if too long truncate in order to maintain a stable speed
-    if (size > this.hash) size = this.hash;
-    // parsing each letter into the string
-    for(var i = 0; i < size; i++) {
-        id = (id + key.charCodeAt(i)) % this.hash;
+    if (typeof key === 'number') {
+        id = key % this.hash;
+    } else {
+        var size = key.length;
+        // if too long truncate in order to maintain a stable speed
+        if (size > this.hash) size = this.hash;
+        // parsing each letter into the string
+        for(var i = 0; i < size; i++) {
+            id = (id + key.charCodeAt(i)) % this.hash;
+        }
     }
     // create the index if not ready
     if (!this.indexes[id]) {
@@ -67,8 +72,8 @@ graph.prototype.getIndex = function(key) {
  * Retrieves an index shard from the specified key
  */
 graph.prototype.index = function(key, value, point) {
-    var index = this.getIndex(value);
-    index.add(key, value, point);
+    var result = this.getIndex(value);
+    result.add(key, value, point);
     return this;
 };
 
@@ -83,8 +88,8 @@ graph.prototype.get = function(uuid) {
  * Removes the specified entry from index
  */
 graph.prototype.removeIndex = function(key, value, point) {
-    var index = this.getIndex(value);
-    index.remove(key, value, point);
+    var result = this.getIndex(value);
+    result.remove(key, value, point);
     return this;
 };
 
@@ -108,7 +113,7 @@ graph.prototype.export = function() {
     }
     return {
         hash: this.hash,
-        uuid: this.uuid,
+        uuid: this.nextId,
         shards: shards,
         indexes: indexes
     };
@@ -121,7 +126,7 @@ graph.prototype.import = function(data) {
 
     // initialize the context
     this.hash = data.hash;
-    this.uuid = data.uuid;
+    this.nextId = data.uuid;
     this.shards = [];
     this.indexes = [];
 
