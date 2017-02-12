@@ -83,3 +83,5 @@ index.prototype.search = function(key, value) {
     }
     return [];
 };
+
+module.exports = index;

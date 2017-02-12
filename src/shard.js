@@ -13,6 +13,7 @@ var shard = function(db, id) {
     this.id = id;
     this.points = {};
     this.length = 0;
+    this.changed = false;
 };
 
 
@@ -24,6 +25,7 @@ shard.prototype.export = function() {
     for(var uuid in this.points) {
         nodes[uuid] = this.points[uuid].export();
     }
+    this.changed = false;
     return nodes;
 };
 
@@ -43,7 +45,17 @@ shard.prototype.import = function(points) {
         );
         this.length ++;
     }
+    this.changed = false;
+    return this;
+};
 
+/**
+ * Factory function
+ */
+shard.prototype.push = function(uuid, object) {
+    this.points[uuid] = object;
+    this.length ++;
+    this.changed = true;
     return this;
 };
 
