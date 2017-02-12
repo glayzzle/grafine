@@ -47,7 +47,7 @@ graph.prototype.createShard = function(id) {
 /**
  * Retrieves an index shard from the specified key
  */
-graph.prototype.index = function(key) {
+graph.prototype.getIndex = function(key) {
     var id = 0;
     var size = key.length;
     // if too long truncate in order to maintain a stable speed
@@ -61,6 +61,31 @@ graph.prototype.index = function(key) {
         this.indexes[id] = this.createIndex(id);
     }
     return this.indexes[id];
+};
+
+/**
+ * Retrieves an index shard from the specified key
+ */
+graph.prototype.index = function(key, value, point) {
+    var index = this.getIndex(value);
+    index.add(key, value, point);
+    return this;
+};
+
+/**
+ * Retrieves an point from the specified uuid
+ */
+graph.prototype.get = function(uuid) {
+    return this.shard(uuid).points[uuid];
+};
+
+/**
+ * Removes the specified entry from index
+ */
+graph.prototype.removeIndex = function(key, value, point) {
+    var index = this.getIndex(value);
+    index.remove(key, value, point);
+    return this;
 };
 
 /**
@@ -144,26 +169,13 @@ graph.prototype.search = function(criteria) {
     var results = [];
     // preparing results
     for(var k in criteria) {
-        if (k in this.index) {
-            var hashes = this.index[k];
-            var check = criteria[k];
-            if (typeof check === 'function') {
-                for(var i in hashes) {
-                    if (check(i) === true) {
-                        results.push(hashes[i]);
-                    }
-                }
-            } else {
-                if (check in hashes) {
-                    results.push(hashes[check]);
-                }
-            }
-        } else return []; // nobody matches
+        var check = criteria[k];
+        results.push(
+            this.getIndex(check).search(k, check)
+        );
     }
     if (results.length === 1) {
-        return results[0].filter(function(item) {
-          return item != undefined;
-        });
+        return results[0];
     }
     // intersect results (quick & dirty / may improve)
     var data = [];
