@@ -6,7 +6,7 @@
 'use strict';
 
 var graph = require('../src/graph');
-var db = new graph();
+var db = new graph(255);
 
 var start = (new Date().getTime());
 var elapsed_time = function(note, counter){
@@ -26,8 +26,8 @@ var last;
 var size = process.argv.length === 3 ? process.argv[2] : 1000;
 for(var i = 0; i < size; i++) {
     var node = db.create();
-    node.index('name', i % 30);
-    node.index('type', i % 60);
+    node.index('name', (i % 54321).toString(36));
+    node.index('type', (i % 12345).toString(36));
     if (i % 5 === 0) {
         if (last) {
             node.set('foo', last);
