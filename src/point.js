@@ -14,32 +14,31 @@ var point = function(graph) {
     this.properties = {};
     this.related = {};
     this.indexes = [];
+    this.uuid = 0;
 };
 
 /**
  * Exports the point
  */
 point.prototype.export = function() {
-    var result = {
-        _p: {},
+    return {
+        _p: this.properties,
         _i: this.indexes
     };
-    for(var k in this.properties) {
-        var relations = this.properties[k];
-        if ('length' in relations) {
-          if (relations.length > 0) {
-              result._p[k] = [];
-              for(var i = 0; i < relations.length; i++) {
-                  var id = this.graph.points.indexOf(relations[i]);
-                  if (id !== -1) result._p[k].push(id);
-              }
-          }
-        } else {
-            var id = this.graph.points.indexOf(relations);
-            if (id !== -1) result._p[k] = id;
-        }
+};
+
+/**
+ * Imports the point
+ */
+point.prototype.import = function(uuid, data) {
+    this.uuid = uuid;
+    this.properties = data._p;
+    this.indexes = data._i;
+    for(var i = 0; i < this.indexes.length; i++) {
+        var index = this.indexes[i];
+        this.graph.index(index[0], index[1], this);
     }
-    return result;
+    return this;
 };
 
 /**
@@ -95,10 +94,7 @@ point.prototype.delete = function() {
     // removes from indexes
     for(var i = 0; i < this.indexes.length; i++) {
         var index = this.indexes[i];
-        var id = this.graph.index[index[0]][index[1]].indexOf(this);
-        if (id !== -1) {
-            this.graph.index[index[0]][index[1]][id] = null;
-        }
+        this.graph.removeIndex(index[0], index[1]);
     }
     // removes from graph
     var id = this.graph.points.indexOf(this);
@@ -114,14 +110,8 @@ point.prototype.delete = function() {
  * Attach current node into the specified index
  */
 point.prototype.index = function(name, value) {
-    if (!(name in this.graph.index)) {
-        this.graph.index[name] = {};
-    }
     if (!value) value = '*';
-    if (!(value in this.graph.index[name])) {
-        this.graph.index[name][value] = [];
-    }
-    this.graph.index[name][value].push(this);
+    this.graph.index(name, value, this);
     this.indexes.push([name, value]);
 };
 
