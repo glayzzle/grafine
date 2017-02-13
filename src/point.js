@@ -14,7 +14,7 @@ var point = function(graph) {
     this.properties = {};
     this.related = {};
     this.indexes = [];
-    this.uuid = 0;
+    this.uuid = -1;
 };
 
 /**
@@ -30,8 +30,7 @@ point.prototype.export = function() {
 /**
  * Imports the point
  */
-point.prototype.import = function(uuid, data) {
-    this.uuid = uuid;
+point.prototype.import = function(data) {
     this.properties = data._p;
     this.indexes = data._i;
     for(var i = 0; i < this.indexes.length; i++) {
@@ -50,7 +49,7 @@ point.prototype.remove = function(property) {
         delete this.properties[property];
         if (!('length' in relations)) relations = [relations];
         for(var i = 0, size = relations.length; i < size; i++) {
-            var related = relations[i].related[property];
+            var related = this.graph.get(relations[i]).related[property];
             var id = related.indexOf(this);
             if (id !== -1) {
                 related.splice(id, 1);
@@ -67,10 +66,11 @@ point.prototype.delete = function() {
     // removes from related nodes
     for(var property in this.properties) {
         var relations = this.properties[property];
-        if (!('length' in relations)) relations = [relations];
+        if (!Array.isArray(relations)) relations = [relations];
         for(var i = 0, size = relations.length; i < size; i++) {
-            var related = relations[i].related[property];
-            var id = related.indexOf(this);
+            var record = this.graph.get(relations[i]);
+            var related = record.related[property];
+            var id = related.indexOf(this.uuid);
             if (id !== -1) {
                 related.splice(id, 1);
             }
@@ -80,11 +80,12 @@ point.prototype.delete = function() {
     for(var property in this.related) {
         var relations = this.related[property];
         for(var i = 0, size = relations.length; i < size; i++) {
-            var related = relations[i].properties[property];
-            if (related === this) {
-                delete relations[i].properties[property];
+            var record = this.graph.get(relations[i]);
+            var related = record.properties[property];
+            if (related === this.uuid) {
+                delete record.properties[property];
             } else {
-                var id = related.indexOf(this);
+                var id = related.indexOf(this.uuid);
                 if (id !== -1) {
                     related.splice(id, 1);
                 }
@@ -94,15 +95,10 @@ point.prototype.delete = function() {
     // removes from indexes
     for(var i = 0; i < this.indexes.length; i++) {
         var index = this.indexes[i];
-        this.graph.removeIndex(index[0], index[1]);
+        this.graph.removeIndex(index[0], index[1], this);
     }
     // removes from graph
-    var id = this.graph.points.indexOf(this);
-    if (id !== -1) {
-        this.graph.points[id] = null;
-    }
-    this.graph.length --;
-    this.graph.gaps ++;
+    this.graph.shard(this.uuid).remove(this);
     return this;
 };
 
@@ -122,20 +118,21 @@ point.prototype.set = function(property, object) {
     if(!(property in object.related)) {
         object.related[property] = [];
     }
-    object.related[property].push(this);
+    object.related[property].push(this.uuid);
+
     if (property in this.properties) {
-        // already exists, so cleanup
+        // already exists, so cleanup old properties
         var relations = this.properties[property];
         if (!('length' in relations)) relations = [relations];
         for(var i = 0, size = relations.length; i < size; i++) {
-            var related = relations[i].related[property];
-            var id = related.indexOf(this);
+            var related = this.graph.get(relations[i]).related[property];
+            var id = related.indexOf(this.uuid);
             if (id !== -1) {
                 related.splice(id, 1);
             }
         }
     }
-    this.properties[property] = object;
+    this.properties[property] = object.uuid;
     return this;
 };
 
@@ -146,15 +143,17 @@ point.prototype.add = function(property, object) {
     if(!(property in object.related)) {
         object.related[property] = [];
     }
-    object.related[property].push(this);
+    object.related[property].push(this.uuid);
+
     if (!(property in this.properties)) {
         this.properties[property] = [];
-    } else if (!('length' in this.properties[property])) {
+    } else if (!Array.isArray(this.properties[property])) {
+        // transform a single value into an array
         this.properties[property] = [
             this.properties[property]
         ];
     }
-    this.properties[property].push(object);
+    this.properties[property].push(object.uuid);
     return this;
 };
 
@@ -163,7 +162,11 @@ point.prototype.add = function(property, object) {
  */
 point.prototype.get = function(property) {
     if (property in this.properties) {
-        return this.properties[property];
+        var result = this.properties[property];
+        if (!Array.isArray(result)) {
+            result = [result];
+        }
+        return result;
     }
     return [];
 };
@@ -172,14 +175,14 @@ point.prototype.get = function(property) {
  * Gets the first child of the specified property
  */
 point.prototype.first = function(property) {
-    var items = this.get(property);
-    if (Array.isArray(items)) {
-        if (items.length > 0) {
-            return items[0];
+    if (property in this.properties) {
+        var result = this.properties[property];
+        if (Array.isArray(result)) {
+            result = result[0];
         }
-        return null;
+        return result;
     }
-    return items;
+    return null;
 };
 
 module.exports = point;
