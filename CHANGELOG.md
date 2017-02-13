@@ -1,3 +1,29 @@
+## [Version 0.2.0](https://github.com/glayzzle/grafine/releases/tag/v0.2.0) (2017-2-13)
+
+### Major Changes
+
+- https://github.com/glayzzle/grafine/issues/3 start the index shard implementation (wip): [`86e1c47`](https://github.com/glayzzle/grafine/commit/86e1c47)
+- https://github.com/glayzzle/grafine/issues/3 start the points shard implementation (wip): [`ca675d6`](https://github.com/glayzzle/grafine/commit/ca675d6)
+- rewrite every function with new framework: [`8b25e2b`](https://github.com/glayzzle/grafine/commit/8b25e2b)
+
+### Minor Changes
+
+- https://github.com/glayzzle/grafine/issues/3 handle import/export of a point: [`cd465ea`](https://github.com/glayzzle/grafine/commit/cd465ea)
+- https://github.com/glayzzle/php-reflection/issues/13 start to migrate the bench file: [`f4adebf`](https://github.com/glayzzle/grafine/commit/f4adebf)
+- https://github.com/glayzzle/php-reflection/issues/13 implement push function on shard & flag changes: [`9561606`](https://github.com/glayzzle/grafine/commit/9561606)
+- implement a size helper on graph + using shards factory now to create a point instance: [`e8f482e`](https://github.com/glayzzle/grafine/commit/e8f482e)
+- implement remove & fixes: [`f7cb68a`](https://github.com/glayzzle/grafine/commit/f7cb68a)
+
+### Patches
+
+- https://github.com/glayzzle/grafine/issues/3 fix index creation: [`873f4a4`](https://github.com/glayzzle/grafine/commit/873f4a4)
+- https://github.com/glayzzle/grafine/issues/3 fix index methods: [`6b65ed3`](https://github.com/glayzzle/grafine/commit/6b65ed3)
+- https://github.com/glayzzle/php-reflection/issues/13 fix uuid function + improve hashing on index function: [`638b23f`](https://github.com/glayzzle/grafine/commit/638b23f)
+- fix benchmark with new framework: [`fb2238e`](https://github.com/glayzzle/grafine/commit/fb2238e)
+- use new framework for tests: [`8e84bbf`](https://github.com/glayzzle/grafine/commit/8e84bbf)
+
+[...full changes](https://github.com/glayzzle/grafine/compare/v0.1.0...v0.2.0)
+
 ## [Version 0.1.0](https://github.com/glayzzle/grafine/releases/tag/v0.1.0) (2017-2-10)
 
 ### Major Changes
