@@ -1,3 +1,11 @@
+## [Version 1.0.0](https://github.com/glayzzle/grafine/releases/tag/v1.0.0) (2017-2-13)
+
+### Major Changes
+
+- general rewrite in order to expose classes (for extensions): [`a30efed`](https://github.com/glayzzle/grafine/commit/a30efed)
+
+[...full changes](https://github.com/glayzzle/grafine/compare/v0.2.0...v1.0.0)
+
 ## [Version 0.2.0](https://github.com/glayzzle/grafine/releases/tag/v0.2.0) (2017-2-13)
 
 ### Major Changes
