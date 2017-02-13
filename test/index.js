@@ -12,7 +12,7 @@ describe('Test points', function() {
     });
     it('should link', function() {
         a.add('child', b);
-        b.should.be.exactly(a.first('child'));
+        b.uuid.should.be.exactly(a.first('child'));
     });
     it('should remove', function() {
         b.delete();
@@ -23,7 +23,7 @@ describe('Test points', function() {
             name: 'a'
         });
         items.length.should.be.exactly(1);
-        a.should.be.exactly(items[0]);
+        a.uuid.should.be.exactly(items[0]);
     });
     it('should not find', function() {
         var items = db.search({
