@@ -5,6 +5,8 @@
  */
 'use strict';
 
+var point = require('./point');
+
 /**
  * A shard storage
  */
@@ -52,9 +54,21 @@ shard.prototype.import = function(points) {
 /**
  * Factory function
  */
-shard.prototype.push = function(uuid, object) {
-    this.points[uuid] = object;
+shard.prototype.attach = function(object) {
+    this.points[object.uuid] = object;
     this.length ++;
+    this.changed = true;
+    return this;
+};
+
+
+/**
+ * Factory function
+ */
+shard.prototype.remove = function(point) {
+    if (point.uuid) point = point.uuid;
+    delete this.points[point];
+    this.length --;
     this.changed = true;
     return this;
 };
@@ -64,7 +78,10 @@ shard.prototype.push = function(uuid, object) {
  */
 shard.prototype.factory = function(uuid, object) {
     var result = new point(this.db);
-    result.import(uuid, object);
+    result.uuid = uuid;
+    if (object) {
+        result.import(object);
+    }
     return result;
 };
 
