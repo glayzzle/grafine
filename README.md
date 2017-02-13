@@ -23,3 +23,23 @@ Found 6012 items	in	7ms 	164Mb	858857/sec
 ---------------------------
 Estimated size 7.6 Mb
 ```
+
+## API :
+
+```
+npm install grafine --save
+```
+
+And next use it :
+
+```js
+var grafine = require('grafine');
+var db = new grafine();
+var a = db.create();
+var b = db.create();
+a.set('friend', b);
+a.index('name', 'john');
+// etc ...
+```
+
+@todo
