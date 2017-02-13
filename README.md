@@ -34,7 +34,7 @@ And next use it :
 
 ```js
 var grafine = require('grafine');
-var db = new grafine();
+var db = new grafine.graph();
 var a = db.create();
 var b = db.create();
 a.set('friend', b);

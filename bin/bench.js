@@ -5,8 +5,8 @@
  */
 'use strict';
 
-var graph = require('../src/graph');
-var db = new graph(255);
+var grafine = require('../index');
+var db = new grafine.graph(255);
 
 var start = (new Date().getTime());
 var elapsed_time = function(note, counter){

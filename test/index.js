@@ -1,7 +1,7 @@
 var should = require("should");
 
-var graph = require('../src/graph');
-var db = new graph();
+var grafine = require('../index');
+var db = new grafine.graph();
 describe('Test points', function() {
     var a, b;
     it('should create', function() {
