@@ -5,7 +5,6 @@
  */
 'use strict';
 
-var point = require('./point');
 var shard = require('./shard');
 var index = require('./index');
 
@@ -18,6 +17,19 @@ var graph = function(hash) {
     this.nextId = 0;
     this.shards = [];
     this.indexes = [];
+};
+
+/**
+ * Calculate the number of nodes
+ */
+graph.prototype.size = function() {
+    var size = 0;
+    for(var i = 0; i < this.shards.length; i++) {
+        if (this.shards[i]) {
+            size += this.shards[i].length;
+        }
+    }
+    return size;
 };
 
 /**
@@ -158,12 +170,15 @@ graph.prototype.import = function(data) {
  * Create a node
  */
 graph.prototype.create = function(result) {
+    var uuid = this.uuid();
+    var shard = this.shard(uuid);
     if (!result) {
-        result = new point(this);
+        result = shard.factory(uuid);
+    } else {
+        result.uuid = uuid;
     }
     // attach it to a shard
-    var uuid = this.uuid();
-    this.shard(uuid).push(uuid, result);
+    shard.attach(result);
     return result;
 };
 
