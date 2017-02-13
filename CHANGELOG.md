@@ -1,3 +1,11 @@
+## [Version 1.0.1](https://github.com/glayzzle/grafine/releases/tag/v1.0.1) (2017-2-13)
+
+### Minor Changes
+
+- add ignore files: [`5c265b1`](https://github.com/glayzzle/grafine/commit/5c265b1)
+
+[...full changes](https://github.com/glayzzle/grafine/compare/v1.0.0...v1.0.1)
+
 ## [Version 1.0.0](https://github.com/glayzzle/grafine/releases/tag/v1.0.0) (2017-2-13)
 
 ### Major Changes
