@@ -35,10 +35,6 @@ module.exports = function(grafine) {
     point.prototype.import = function(data) {
         this.properties = data._p;
         this.indexes = data._i;
-        for(var i = 0; i < this.indexes.length; i++) {
-            var index = this.indexes[i];
-            this.graph.index(index[0], index[1], this);
-        }
         return this;
     };
 
