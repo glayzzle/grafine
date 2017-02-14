@@ -80,6 +80,21 @@ module.exports = function(grafine) {
     };
 
     /**
+     * Retrieves each index entry
+     */
+    graph.prototype.readIndex = function(key, cb) {
+        for(var i = 0; i < this.hash; i++) {
+            if (!this.indexes[i]) {
+                this.indexes[i] = this.createIndex(i);
+            }
+            if (key in this.indexes[i]) {
+              cb(this.indexes[i][k]);
+            }
+        }
+        return this;
+    };
+
+    /**
      * Retrieves an index shard from the specified key
      */
     graph.prototype.index = function(key, value, point) {
