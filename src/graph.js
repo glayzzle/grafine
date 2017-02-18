@@ -42,7 +42,7 @@ module.exports = function(grafine) {
      * Retrieves a shard from the specified uuid
      */
     graph.prototype.shard = function(uuid) {
-        var id = uuid % this.hash;
+        var id = ((uuid - (uuid % this.hash)) / this.hash) % this.hash;
         if (!this.shards[id]) {
             this.shards[id] = this.createShard(id);
         }
