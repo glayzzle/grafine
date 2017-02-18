@@ -101,6 +101,34 @@ module.exports = function(grafine) {
     };
 
     /**
+     * Removes an index entry
+     */
+    point.prototype.removeIndex = function(name) {
+        for(var i = 0; i < this.indexes.length; i++) {
+            var index = this.indexes[i];
+            if (index[0] === name) {
+                this.graph.removeIndex(index[0], index[1], this);
+                this.indexes.splice(i, 1);
+                break;
+            }
+        }
+        return this;
+    };
+
+    /**
+     * Reads an index entry
+     */
+    point.prototype.getIndex = function(name) {
+        for(var i = 0; i < this.indexes.length; i++) {
+            var index = this.indexes[i];
+            if (index[0] === name) {
+                return index[1];
+            }
+        }
+        return null;
+    };
+
+    /**
      * Attach current node into the specified index
      */
     point.prototype.index = function(name, value) {
