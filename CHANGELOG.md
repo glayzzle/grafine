@@ -1,3 +1,17 @@
+## [Version 1.0.2](https://github.com/glayzzle/grafine/releases/tag/v1.0.2) (2017-2-18)
+
+### Minor Changes
+
+- add an index iterator: [`2f10553`](https://github.com/glayzzle/grafine/commit/2f10553)
+- avoid points dispersion between shards: [`adb3206`](https://github.com/glayzzle/grafine/commit/adb3206)
+- add a removeIndex helper: [`a1fa1a1`](https://github.com/glayzzle/grafine/commit/a1fa1a1)
+
+### Patches
+
+- remove index building/done elsewhere: [`5bc3e7c`](https://github.com/glayzzle/grafine/commit/5bc3e7c)
+
+[...full changes](https://github.com/glayzzle/grafine/compare/v1.0.1...v1.0.2)
+
 ## [Version 1.0.1](https://github.com/glayzzle/grafine/releases/tag/v1.0.1) (2017-2-13)
 
 ### Minor Changes
