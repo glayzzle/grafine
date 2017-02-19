@@ -1,3 +1,11 @@
+## [Version 1.1.3](https://github.com/glayzzle/grafine/releases/tag/v1.1.3) (2017-2-19)
+
+### Minor Changes
+
+- use iterator instead  keyword: [`ba909f3`](https://github.com/glayzzle/grafine/commit/ba909f3)
+
+[...full changes](https://github.com/glayzzle/grafine/compare/v1.1.2...v1.1.3)
+
 ## [Version 1.1.2](https://github.com/glayzzle/grafine/releases/tag/v1.1.2) (2017-2-19)
 
 ### Patches
