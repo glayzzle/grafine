@@ -9,50 +9,69 @@ module.exports = function(grafine) {
 
     /**
      * An index storage
+     * @constructor Index
      */
-    var index = function(db, id) {
-        this.db = db;
-        this.id = id;
-        this.index = {};
-        this.length = 0;
-        this.changed = false;
+    var Index = function(db, id) {
+        this._db = db;
+        this._id = id;
+        this._index = {};
+        this._size = 0;
+        this._changed = false;
+    };
+
+    /**
+     * Check if current index contains changes
+     * @return {Boolean}
+     */
+    Index.prototype.isChanged = function() {
+        return this._changed;
+    };
+
+
+    /**
+     * Gets number of indexed items
+     * @return {Number}
+     */
+    Index.prototype.getSize = function() {
+        return this._size;
     };
 
     /**
      * Exports the index
      */
-    index.prototype.export = function() {
-        this.changed = false;
+    Index.prototype.export = function() {
+        this._changed = false;
         return [
-            this.length,
-            this.index
+            this._size,
+            this._index
         ];
     };
 
     /**
      * Imports the index
      */
-    index.prototype.import = function(data) {
-        this.length = data[0];
-        this.index = data[1];
-        this.changed = false;
+    Index.prototype.import = function(data) {
+        this._size = data[0];
+        this._index = data[1];
+        this._changed = false;
+        return this;
     };
 
     /**
      * Indexing the specified value
      */
-    index.prototype.add = function(key, value, point) {
-        if (!(key in this.index)) {
-            this.index[key] = {};
+    Index.prototype.add = function(key, value, point) {
+        if (!(key in this._index)) {
+            this._index[key] = {};
         }
-        if (!(value in this.index[key])) {
-            this.index[key][value] = [];
+        if (!(value in this._index[key])) {
+            this._index[key][value] = [];
         }
         if (point.uuid) point = point.uuid;
-        if (this.index[key][value].indexOf(point) === -1) {
-            this.changed = true;
-            this.index[key][value].push(point);
-            this.length ++;
+        if (this._index[key][value].indexOf(point) === -1) {
+            this._index[key][value].push(point);
+            this._changed = true;
+            this._size ++;
         }
         return this;
     };
@@ -60,17 +79,18 @@ module.exports = function(grafine) {
     /**
      * Removes an entry from index
      */
-    index.prototype.remove = function(key, value, point) {
-        if (key in this.index && value in this.index[key]) {
+    Index.prototype.remove = function(key, value, point) {
+        if (key in this._index && value in this._index[key]) {
             if (point.uuid) point = point.uuid;
-            var index = this.index[key][value].indexOf(point);
+            var index = this._index[key][value].indexOf(point);
             if (index !== -1) {
-                this.changed = true;
-                if (this.index[key][value].length === 1) {
-                    delete this.index[key][value];
+                if (this._index[key][value].length === 1) {
+                    delete this._index[key][value];
                 } else {
-                    this.index[key][value].splice(index, 1);
+                    this._index[key][value].splice(index, 1);
                 }
+                this._changed = true;
+                this._size --;
             }
         }
         return this;
@@ -79,12 +99,25 @@ module.exports = function(grafine) {
     /**
      * Retrieves an index values (list of points)
      */
-    index.prototype.search = function(key, value) {
-        if (key in this.index && value in this.index[key]) {
-            return this.index[key][value];
+    Index.prototype.search = function(key, value) {
+        if (key in this._index && value in this._index[key]) {
+            return this._index[key][value];
         }
         return [];
     };
 
-    return index;
+    /**
+     * Iterate over a list of items
+     */
+    Index.prototype.each = function(key, cb) {
+        if (key in this._index) {
+            var entries = this._index[key];
+            for(var k in entries) {
+                cb(k, entries[k]);
+            }
+        }
+        return this;
+    };
+
+    return Index;
 };

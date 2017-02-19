@@ -8,66 +8,66 @@
 module.exports = function(grafine) {
 
     /**
-     * Everything starts with the point
-     * https://www.youtube.com/watch?v=0ca4miMMaCE
+     * Defines a point entry
+     * @constructor Point
      */
-    var point = function(graph) {
-        this.graph = graph;
-        this.properties = {};
-        this.related = {};
-        this.indexes = [];
+    var Point = function(db) {
+        /**
+         * @property {Graph} _db The graph container instance
+         */
+        this._db = db;
+        /**
+         * @property {Object} _properties List of relations towards other points
+         */
+        this._properties = {};
+        /**
+         * @property {Object} _related List of related nodes
+         */
+        this._related = {};
+        /**
+         * @property {Array} _indexes List of indexed values
+         */
+        this._indexes = [];
+        /**
+         * @property {Number} uuid Unique point identifier
+         */
         this.uuid = -1;
     };
 
     /**
-     * Exports the point
+     * Exports the point (for serialisation/caching purpose)
+     * @return {Object}
      */
-    point.prototype.export = function() {
+    Point.prototype.export = function() {
         return {
-            _p: this.properties,
-            _i: this.indexes
+            _p: this._properties,
+            _i: this._indexes
         };
     };
 
     /**
-     * Imports the point
+     * Imports the point (from a unserialized value previously 
+     * generated with export function)
+     * @param {Object} data The data to be imported (properties & indexes)
+     * @return {Point}
      */
-    point.prototype.import = function(data) {
-        this.properties = data._p;
-        this.indexes = data._i;
-        return this;
-    };
-
-    /**
-     * Just deletes a property
-     */
-    point.prototype.remove = function(property) {
-        if (property in this.properties) {
-            var relations = this.properties[property];
-            delete this.properties[property];
-            if (!('length' in relations)) relations = [relations];
-            for(var i = 0, size = relations.length; i < size; i++) {
-                var related = this.graph.get(relations[i]).related[property];
-                var id = related.indexOf(this);
-                if (id !== -1) {
-                    related.splice(id, 1);
-                }
-            }
-        }
+    Point.prototype.import = function(data) {
+        this._properties = data._p;
+        this._indexes = data._i;
         return this;
     };
 
     /**
      * Deletes the point from the graph
      */
-    point.prototype.delete = function() {
+    Point.prototype.delete = function() {
         // removes from related nodes
-        for(var property in this.properties) {
-            var relations = this.properties[property];
-            if (!Array.isArray(relations)) relations = [relations];
+        for(var property in this._properties) {
+            var relations = this._properties[property];
+            if (!(relations instanceof Array)) relations = [relations];
             for(var i = 0, size = relations.length; i < size; i++) {
-                var record = this.graph.get(relations[i]);
-                var related = record.related[property];
+                var record = this._db.get(relations[i]);
+                var related = record._related[property];
                 var id = related.indexOf(this.uuid);
                 if (id !== -1) {
                     related.splice(id, 1);
@@ -75,13 +75,13 @@ module.exports = function(grafine) {
             }
         }
         // removes related properties nodes
-        for(var property in this.related) {
-            var relations = this.related[property];
+        for(var property in this._related) {
+            var relations = this._related[property];
             for(var i = 0, size = relations.length; i < size; i++) {
-                var record = this.graph.get(relations[i]);
-                var related = record.properties[property];
+                var record = this._db.get(relations[i]);
+                var related = record._properties[property];
                 if (related === this.uuid) {
-                    delete record.properties[property];
+                    delete record._properties[property];
                 } else {
                     var id = related.indexOf(this.uuid);
                     if (id !== -1) {
@@ -91,24 +91,46 @@ module.exports = function(grafine) {
             }
         }
         // removes from indexes
-        for(var i = 0; i < this.indexes.length; i++) {
-            var index = this.indexes[i];
-            this.graph.removeIndex(index[0], index[1], this);
+        for(var i = 0; i < this._indexes.length; i++) {
+            var idx = this._indexes[i];
+            this._db.removeIndex(idx[0], idx[1], this);
         }
         // removes from graph
-        this.graph.shard(this.uuid).remove(this);
+        this._db.shard(this.uuid).remove(this);
+        return this;
+    };
+
+    /**
+     * Just deletes a property (and their links)
+     */
+    Point.prototype.removeAttribute = function(property) {
+        if (property in this._properties) {
+            var relations = this._properties[property];
+            delete this._properties[property];
+            if (!(relations instanceof Array)) relations = [relations];
+            for(var i = 0, size = relations.length; i < size; i++) {
+                var related = this._db.get(relations[i]);
+                if (related) {
+                    related = related._related[property];
+                    var id = related.indexOf(this.uuid);
+                    if (id !== -1) {
+                        related.splice(id, 1);
+                    }
+                }
+            }
+        }
         return this;
     };
 
     /**
      * Removes an index entry
      */
-    point.prototype.removeIndex = function(name) {
-        for(var i = 0; i < this.indexes.length; i++) {
-            var index = this.indexes[i];
+    Point.prototype.removeIndex = function(name) {
+        for(var i = 0; i < this._indexes.length; i++) {
+            var index = this._indexes[i];
             if (index[0] === name) {
-                this.graph.removeIndex(index[0], index[1], this);
-                this.indexes.splice(i, 1);
+                this._db.removeIndex(index[0], index[1], this);
+                this._indexes.splice(i, 1);
                 break;
             }
         }
@@ -116,11 +138,11 @@ module.exports = function(grafine) {
     };
 
     /**
-     * Reads an index entry
+     * Reads an indexed entry value
      */
-    point.prototype.getIndex = function(name) {
-        for(var i = 0; i < this.indexes.length; i++) {
-            var index = this.indexes[i];
+    Point.prototype.getIndex = function(name) {
+        for(var i = 0; i < this._indexes.length; i++) {
+            var index = this._indexes[i];
             if (index[0] === name) {
                 return index[1];
             }
@@ -131,65 +153,68 @@ module.exports = function(grafine) {
     /**
      * Attach current node into the specified index
      */
-    point.prototype.index = function(name, value) {
+    Point.prototype.index = function(name, value) {
         if (!value) value = '*';
-        this.graph.index(name, value, this);
-        this.indexes.push([name, value]);
+        this._db.index(name, value, this);
+        this._indexes.push([name, value]);
     };
 
     /**
      * Creates a relation to the specified object
      */
-    point.prototype.set = function(property, object) {
-        if(!(property in object.related)) {
-            object.related[property] = [];
+    Point.prototype.set = function(property, object) {
+        if(!(property in object._related)) {
+            object._related[property] = [];
         }
-        object.related[property].push(this.uuid);
+        object._related[property].push(this.uuid);
 
-        if (property in this.properties) {
+        if (property in this._properties) {
             // already exists, so cleanup old properties
-            var relations = this.properties[property];
-            if (!('length' in relations)) relations = [relations];
+            var relations = this._properties[property];
+            if (!(relations instanceof Array)) relations = [relations];
             for(var i = 0, size = relations.length; i < size; i++) {
-                var related = this.graph.get(relations[i]).related[property];
-                var id = related.indexOf(this.uuid);
-                if (id !== -1) {
-                    related.splice(id, 1);
+                var related = this._db.get(relations[i]);
+                if (related) {
+                    related = related._related[property];
+                    var id = related.indexOf(this.uuid);
+                    if (id !== -1) {
+                        related.splice(id, 1);
+                    }
                 }
             }
         }
-        this.properties[property] = object.uuid;
+        this._properties[property] = object.uuid;
         return this;
     };
 
     /**
      * Add a new relation to the specified object
      */
-    point.prototype.add = function(property, object) {
-        if(!(property in object.related)) {
-            object.related[property] = [];
+    Point.prototype.add = function(property, object) {
+        if(!(property in object._related)) {
+            object._related[property] = [];
         }
-        object.related[property].push(this.uuid);
+        object._related[property].push(this.uuid);
 
-        if (!(property in this.properties)) {
-            this.properties[property] = [];
-        } else if (!Array.isArray(this.properties[property])) {
+        if (!(property in this._properties)) {
+            this._properties[property] = [];
+        } else if (!(this._properties[property] instanceof Array)) {
             // transform a single value into an array
-            this.properties[property] = [
-                this.properties[property]
+            this._properties[property] = [
+                this._properties[property]
             ];
         }
-        this.properties[property].push(object.uuid);
+        this._properties[property].push(object.uuid);
         return this;
     };
 
     /**
      * Gets a list of objects
      */
-    point.prototype.get = function(property) {
-        if (property in this.properties) {
-            var result = this.properties[property];
-            if (!Array.isArray(result)) {
+    Point.prototype.get = function(property) {
+        if (property in this._properties) {
+            var result = this._properties[property];
+            if (!(result instanceof Array)) {
                 result = [result];
             }
             return result;
@@ -200,10 +225,10 @@ module.exports = function(grafine) {
     /**
      * Gets the first child of the specified property
      */
-    point.prototype.first = function(property) {
-        if (property in this.properties) {
-            var result = this.properties[property];
-            if (Array.isArray(result)) {
+    Point.prototype.first = function(property) {
+        if (property in this._properties) {
+            var result = this._properties[property];
+            if (result instanceof Array) {
                 result = result[0];
             }
             return result;
@@ -211,5 +236,5 @@ module.exports = function(grafine) {
         return null;
     };
 
-    return point;
+    return Point;
 };

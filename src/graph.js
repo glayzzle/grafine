@@ -9,23 +9,26 @@ module.exports = function(grafine) {
 
     /**
      * Initialize a storage
+     * @constructor Graph
      */
-    var graph = function(hash) {
+    var Graph = function (hash, capacity) {
         if (!hash) hash = 255;
-        this.hash = hash;
-        this.nextId = 0;
-        this.shards = [];
-        this.indexes = [];
+        if (!capacity) capacity = hash * 4;
+        this._hash = hash;
+        this._capacity = capacity;
+        this._nextId = 0;
+        this._shards = [];
+        this._indexes = [];
     };
 
     /**
      * Calculate the number of nodes
      */
-    graph.prototype.size = function() {
+    Graph.prototype.size = function() {
         var size = 0;
-        for(var i = 0; i < this.shards.length; i++) {
-            if (this.shards[i]) {
-                size += this.shards[i].length;
+        for(var i = 0; i < this._shards.length; i++) {
+            if (this._shards[i]) {
+                size += this._shards[i]._size;
             }
         }
         return size;
@@ -34,61 +37,63 @@ module.exports = function(grafine) {
     /**
      * Generate a uuid (autoincrement)
      */
-    graph.prototype.uuid = function() {
-        return ++this.nextId;
+    Graph.prototype.uuid = function() {
+        return ++this._nextId;
     };
 
     /**
      * Retrieves a shard from the specified uuid
      */
-    graph.prototype.shard = function(uuid) {
-        var id = ((uuid - (uuid % this.hash)) / this.hash) % this.hash;
-        if (!this.shards[id]) {
-            this.shards[id] = this.createShard(id);
+    Graph.prototype.shard = function(uuid) {
+        // hashing function take in account capacity in order
+        // to avoid spreading related nodes between too many shards
+        var id = ((uuid - (uuid % this._capacity)) / this._capacity) % this._hash;
+        if (!this._shards[id]) {
+            this._shards[id] = this.createShard(id);
         }
-        return this.shards[id];
+        return this._shards[id];
     };
 
     /**
      * Shard factory (lazy loading helper)
      */
-    graph.prototype.createShard = function(id) {
+    Graph.prototype.createShard = function(id) {
         return new grafine.shard(this, id);
     };
 
     /**
      * Retrieves an index shard from the specified key
      */
-    graph.prototype.getIndex = function(key) {
+    Graph.prototype.getIndex = function(key) {
         var id = 0;
         if (typeof key === 'number') {
-            id = key % this.hash;
+            id = key % this._hash;
         } else {
             var size = key.length;
             // if too long truncate in order to maintain a stable speed
-            if (size > this.hash) size = this.hash;
+            if (size > this._hash) size = this._hash;
             // parsing each letter into the string
             for(var i = 0; i < size; i++) {
-                id = (id + key.charCodeAt(i)) % this.hash;
+                id = (id + key.charCodeAt(i)) % this._hash;
             }
         }
         // create the index if not ready
-        if (!this.indexes[id]) {
-            this.indexes[id] = this.createIndex(id);
+        if (!this._indexes[id]) {
+            this._indexes[id] = this.createIndex(id);
         }
-        return this.indexes[id];
+        return this._indexes[id];
     };
 
     /**
      * Retrieves each index entry
      */
-    graph.prototype.readIndex = function(key, cb) {
-        for(var i = 0; i < this.hash; i++) {
-            if (!this.indexes[i]) {
-                this.indexes[i] = this.createIndex(i);
+    Graph.prototype.readIndex = function(key, cb) {
+        for(var i = 0; i < this._hash; i++) {
+            if (!this._indexes[i]) {
+                this._indexes[i] = this.createIndex(i);
             }
-            if (key in this.indexes[i]) {
-              cb(this.indexes[i][k]);
+            if (key in this._indexes[i]) {
+              cb(this._indexes[i][k]);
             }
         }
         return this;
@@ -97,7 +102,7 @@ module.exports = function(grafine) {
     /**
      * Retrieves an index shard from the specified key
      */
-    graph.prototype.index = function(key, value, point) {
+    Graph.prototype.index = function(key, value, point) {
         var result = this.getIndex(value);
         result.add(key, value, point);
         return this;
@@ -106,14 +111,34 @@ module.exports = function(grafine) {
     /**
      * Retrieves an point from the specified uuid
      */
-    graph.prototype.get = function(uuid) {
-        return this.shard(uuid).points[uuid];
+    Graph.prototype.get = function(uuid) {
+        return this.shard(uuid).get(uuid);
+    };
+
+    /**
+     * Retrieves an point from the specified uuid
+     */
+    Graph.prototype.resolve = function(data) {
+        if (Array.isArray(data)) {
+            var result = [];
+            for(var i = 0; i < data.length; i++) {
+                var item = this.get(data[i]);
+                if (item) {
+                    result.push(item);
+                }
+            }
+            return result;
+        }
+        if (typeof data === 'number') {
+            return this.get(data);
+        }
+        return null;
     };
 
     /**
      * Removes the specified entry from index
      */
-    graph.prototype.removeIndex = function(key, value, point) {
+    Graph.prototype.removeIndex = function(key, value, point) {
         var result = this.getIndex(value);
         result.remove(key, value, point);
         return this;
@@ -122,24 +147,25 @@ module.exports = function(grafine) {
     /**
      * Index factory (lazy loading helper)
      */
-    graph.prototype.createIndex = function(id) {
+    Graph.prototype.createIndex = function(id) {
         return new grafine.index(this, id);
     };
 
     /**
      * Export all nodes as a plain object
      */
-    graph.prototype.export = function() {
+    Graph.prototype.export = function() {
         var shards = [], indexes = [];
-        for(var i = 0; i < this.shards.length; i++) {
-            shards.push(this.shards[i] ? this.shards[i].export() : null);
+        for(var i = 0; i < this._shards.length; i++) {
+            shards.push(this._shards[i] ? this._shards[i].export() : null);
         }
-        for(var i = 0; i < this.indexes.length; i++) {
-            indexes.push(this.indexes[i] ? this.indexes[i].export() : null);
+        for(var i = 0; i < this._indexes.length; i++) {
+            indexes.push(this._indexes[i] ? this._indexes[i].export() : null);
         }
         return {
-            hash: this.hash,
-            uuid: this.nextId,
+            hash: this._hash,
+            capacity: this._capacity,
+            uuid: this._nextId,
             shards: shards,
             indexes: indexes
         };
@@ -148,20 +174,21 @@ module.exports = function(grafine) {
     /**
      * Importing all nodes
      */
-    graph.prototype.import = function(data) {
+    Graph.prototype.import = function(data) {
 
         // initialize the context
-        this.hash = data.hash;
-        this.nextId = data.uuid;
-        this.shards = [];
-        this.indexes = [];
+        this._hash = data.hash;
+        this._capacity = data.capacity;
+        this._nextId = data.uuid;
+        this._shards = [];
+        this._indexes = [];
 
         // import shards
         if (data.shards && data.shards.length > 0) {
             for(var i = 0, size = data.shards.length; i < size; i++) {
                 if (data.shards[i]) {
-                    this.shards[i] = new grafine.shard(this, i);
-                    this.shards[i].import(data.shards[i]);
+                    this._shards[i] = new grafine.shard(this, i);
+                    this._shards[i].import(data.shards[i]);
                 }
             }
         }
@@ -170,8 +197,8 @@ module.exports = function(grafine) {
         if (data.indexes && data.indexes.length > 0) {
             for(var i = 0, size = data.indexes.length; i < size; i++) {
                 if (data.indexes[i]) {
-                    this.indexes[i] = new grafine.index(this, i);
-                    this.indexes[i].import(data.indexes[i]);
+                    this._indexes[i] = new grafine.index(this, i);
+                    this._indexes[i].import(data.indexes[i]);
                 }
             }
         }
@@ -183,7 +210,7 @@ module.exports = function(grafine) {
     /**
      * Create a node
      */
-    graph.prototype.create = function(result) {
+    Graph.prototype.create = function(result) {
         var uuid = this.uuid();
         var shard = this.shard(uuid);
         if (!result) {
@@ -199,7 +226,7 @@ module.exports = function(grafine) {
     /**
      * Proceed to a multicriteria search
      */
-    graph.prototype.search = function(criteria) {
+    Graph.prototype.search = function(criteria) {
         var results = [];
         // preparing results
         for(var k in criteria) {
@@ -232,5 +259,5 @@ module.exports = function(grafine) {
         return data;
     };
 
-    return graph;
+    return Graph;
 };
