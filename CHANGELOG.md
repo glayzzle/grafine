@@ -1,3 +1,11 @@
+## [Version 1.1.1](https://github.com/glayzzle/grafine/releases/tag/v1.1.1) (2017-2-19)
+
+### Patches
+
+- https://github.com/glayzzle/grafine/issues/4 fix collisions with Map objects: [`8a1bdff`](https://github.com/glayzzle/grafine/commit/8a1bdff)
+
+[...full changes](https://github.com/glayzzle/grafine/compare/v1.1.0...v1.1.1)
+
 ## [Version 1.1.0](https://github.com/glayzzle/grafine/releases/tag/v1.1.0) (2017-2-19)
 
 ### Major Changes
