@@ -1,3 +1,17 @@
+## [Version 1.1.0](https://github.com/glayzzle/grafine/releases/tag/v1.1.0) (2017-2-19)
+
+### Major Changes
+
+- generate documentation: [`12f29ae`](https://github.com/glayzzle/grafine/commit/12f29ae)
+- add JS sources: [`dabb3ba`](https://github.com/glayzzle/grafine/commit/dabb3ba)
+- rewrite the api in order to make it more consistent: [`5888530`](https://github.com/glayzzle/grafine/commit/5888530)
+
+### Minor Changes
+
+- add js & doc generators: [`5507257`](https://github.com/glayzzle/grafine/commit/5507257)
+
+[...full changes](https://github.com/glayzzle/grafine/compare/v1.0.2...v1.1.0)
+
 ## [Version 1.0.2](https://github.com/glayzzle/grafine/releases/tag/v1.0.2) (2017-2-18)
 
 ### Minor Changes
