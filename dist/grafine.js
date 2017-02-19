@@ -282,7 +282,7 @@ module.exports = function(grafine) {
     var Index = function(db, id) {
         this._db = db;
         this._id = id;
-        this._index = {};
+        this._index = new Map();
         this._size = 0;
         this._changed = false;
     };
@@ -309,9 +309,21 @@ module.exports = function(grafine) {
      */
     Index.prototype.export = function() {
         this._changed = false;
+        var toJson = [], k, v, key, value, inner;
+        for([key, value] of this._index) {
+            if (value) {
+                inner = [];
+                for([k, v] of value) {
+                    if (v && v.length > 0) {
+                        inner.push([k, v]);
+                    }
+                }
+                toJson.push([key, inner]);
+            }
+        }
         return [
             this._size,
-            this._index
+            toJson
         ];
     };
 
@@ -320,7 +332,16 @@ module.exports = function(grafine) {
      */
     Index.prototype.import = function(data) {
         this._size = data[0];
-        this._index = data[1];
+        var indexMap = [];
+        for(var i = 0; i < data[1].length; i++) {
+            indexMap.push(
+                [
+                    data[1][i][0],          // key
+                    new Map(data[1][i][1])  // value
+                ]
+            );
+        }
+        this._index = new Map(indexMap);
         this._changed = false;
         return this;
     };
@@ -329,15 +350,19 @@ module.exports = function(grafine) {
      * Indexing the specified value
      */
     Index.prototype.add = function(key, value, point) {
-        if (!(key in this._index)) {
-            this._index[key] = {};
+        var values = this._index.get(key);
+        if (!values) {
+            values = new Map();
+            this._index.set(key, values);
         }
-        if (!(value in this._index[key])) {
-            this._index[key][value] = [];
+        var indexes = values.get(value);
+        if (!indexes) {
+            indexes = [];
+            values.set(value, indexes);
         }
         if (point.uuid) point = point.uuid;
-        if (this._index[key][value].indexOf(point) === -1) {
-            this._index[key][value].push(point);
+        if (indexes.indexOf(point) === -1) {
+            indexes.push(point);
             this._changed = true;
             this._size ++;
         }
@@ -348,17 +373,21 @@ module.exports = function(grafine) {
      * Removes an entry from index
      */
     Index.prototype.remove = function(key, value, point) {
-        if (key in this._index && value in this._index[key]) {
-            if (point.uuid) point = point.uuid;
-            var index = this._index[key][value].indexOf(point);
-            if (index !== -1) {
-                if (this._index[key][value].length === 1) {
-                    delete this._index[key][value];
-                } else {
-                    this._index[key][value].splice(index, 1);
+        var values = this._index.get(key);
+        if (values) {
+            var indexes = values.get(value);
+            if (indexes) {
+                if (point.uuid) point = point.uuid;
+                var index = indexes.indexOf(point);
+                if (index !== -1) {
+                    if (indexes.length === 1) {
+                        values.set(value, null);
+                    } else {
+                        indexes.splice(index, 1);
+                    }
+                    this._changed = true;
+                    this._size --;
                 }
-                this._changed = true;
-                this._size --;
             }
         }
         return this;
@@ -368,8 +397,12 @@ module.exports = function(grafine) {
      * Retrieves an index values (list of points)
      */
     Index.prototype.search = function(key, value) {
-        if (key in this._index && value in this._index[key]) {
-            return this._index[key][value];
+        var values = this._index.get(key);
+        if (values) {
+            var indexes = values.get(value);
+            if (indexes) {
+                return indexes;
+            }
         }
         return [];
     };
@@ -378,10 +411,12 @@ module.exports = function(grafine) {
      * Iterate over a list of items
      */
     Index.prototype.each = function(key, cb) {
-        if (key in this._index) {
-            var entries = this._index[key];
-            for(var k in entries) {
-                cb(k, entries[k]);
+        var values = this._index.get(key), k, v;
+        if (values) {
+            for([k, v] of values) {
+                if (v) {
+                    cb(k, v);
+                }
             }
         }
         return this;
