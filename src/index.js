@@ -41,16 +41,18 @@ module.exports = function(grafine) {
      */
     Index.prototype.export = function() {
         this._changed = false;
-        var toJson = [], k, v, key, value, inner;
-        for([key, value] of this._index) {
-            if (value) {
+        var toJson = [], entry, inner, it, v;
+        var entries = this._index.entries();
+        while((entry = entries.next()) && !entry.done) {
+            if (entry.value[1]) {
                 inner = [];
-                for([k, v] of value) {
-                    if (v && v.length > 0) {
-                        inner.push([k, v]);
+                it = entry.value[1].entries();
+                while((v = it.next()) && !v.done) {
+                    if (v.value[1] && v.value[1].length > 0) {
+                        inner.push(v.value);
                     }
                 }
-                toJson.push([key, inner]);
+                toJson.push([entry.value[0], inner]);
             }
         }
         return [
@@ -143,11 +145,12 @@ module.exports = function(grafine) {
      * Iterate over a list of items
      */
     Index.prototype.each = function(key, cb) {
-        var values = this._index.get(key), k, v;
+        var values = this._index.get(key);
         if (values) {
-            for([k, v] of values) {
-                if (v) {
-                    cb(k, v);
+            var it = values.entries(), entry;
+            while((entry = it.next()) && !entry.done) {
+                if (entry.value[1]) {
+                    cb(entry.value[0], entry.value[1]);
                 }
             }
         }
