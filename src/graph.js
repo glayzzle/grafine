@@ -92,9 +92,7 @@ module.exports = function(grafine) {
             if (!this._indexes[i]) {
                 this._indexes[i] = this.createIndex(i);
             }
-            if (key in this._indexes[i]) {
-              cb(this._indexes[i][k]);
-            }
+            this._indexes[i].each(key, cb);
         }
         return this;
     };
