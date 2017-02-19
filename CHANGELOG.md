@@ -1,3 +1,11 @@
+## [Version 1.1.2](https://github.com/glayzzle/grafine/releases/tag/v1.1.2) (2017-2-19)
+
+### Patches
+
+- fix index scan: [`f194f8c`](https://github.com/glayzzle/grafine/commit/f194f8c)
+
+[...full changes](https://github.com/glayzzle/grafine/compare/v1.1.1...v1.1.2)
+
 ## [Version 1.1.1](https://github.com/glayzzle/grafine/releases/tag/v1.1.1) (2017-2-19)
 
 ### Patches
