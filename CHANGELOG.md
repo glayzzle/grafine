@@ -1,3 +1,11 @@
+## [Version 1.1.4](https://github.com/glayzzle/grafine/releases/tag/v1.1.4) (2017-2-21)
+
+### Minor Changes
+
+- add a typescript definition: [`f172409`](https://github.com/glayzzle/grafine/commit/f172409)
+
+[...full changes](https://github.com/glayzzle/grafine/compare/v1.1.3...v1.1.4)
+
 ## [Version 1.1.3](https://github.com/glayzzle/grafine/releases/tag/v1.1.3) (2017-2-19)
 
 ### Minor Changes
