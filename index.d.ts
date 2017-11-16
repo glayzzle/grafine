@@ -73,5 +73,7 @@ declare module "grafine" {
         create(): point;
         create(point: point): point;
         search(criteria: any): Number[];
+        shards(): shard[];
+        indexes(): index[];
     }
 }

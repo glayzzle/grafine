@@ -42,6 +42,20 @@ module.exports = function(grafine) {
     };
 
     /**
+     * Retrieves a list of shards
+     */
+    Graph.prototype.shards = function() {
+        return this._shards;
+    };
+
+    /**
+     * Retrieves a list of indexes
+     */
+    Graph.prototype.indexes = function() {
+        return this._indexes;
+    }
+
+    /**
      * Retrieves a shard from the specified uuid
      */
     Graph.prototype.shard = function(uuid) {
