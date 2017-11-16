@@ -300,6 +300,14 @@ module.exports = function(grafine) {
     };
 
     /**
+     * Gets the index unique identifier
+     * @return Number
+     */
+    Index.prototype.id = function() {
+      return this._id;
+    };
+
+    /**
      * Check if current index contains changes
      * @return {Boolean}
      */
@@ -702,6 +710,14 @@ module.exports = function(grafine) {
         this._points = {};
         this._size = 0;
         this._changed = false;
+    };
+
+    /**
+     * Gets the shard ID
+     * @return Number
+     */
+    Shard.prototype.id = function() {
+      return this._id;
     };
 
     /**
