@@ -17,6 +17,14 @@ Calculate the number of nodes
 
 Generate a uuid (autoincrement)
 
+### shards
+
+Retrieves a list of shards
+
+### indexes
+
+Retrieves a list of indexes
+
 ### shard
 
 Retrieves a shard from the specified uuid
