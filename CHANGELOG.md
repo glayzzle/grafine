@@ -1,3 +1,16 @@
+## [Version 1.3.0](https://github.com/glayzzle/grafine/releases/tag/v1.3.0) (2017-11-16)
+
+### New features
+
+- expose shard & index identifier: [`77a97ab`](https://github.com/glayzzle/grafine/commit/77a97ab)
+
+### Bug fixes
+
+- rebuild docs: [`78cfe55`](https://github.com/glayzzle/grafine/commit/78cfe55)
+- release build: [`bc23d1d`](https://github.com/glayzzle/grafine/commit/bc23d1d)
+
+[...full changes](https://github.com/glayzzle/grafine/compare/v1.2.0...v1.3.0)
+
 ## [Version 1.2.0](https://github.com/glayzzle/grafine/releases/tag/v1.2.0) (2017-11-16)
 
 ### New features
