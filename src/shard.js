@@ -20,6 +20,14 @@ module.exports = function(grafine) {
     };
 
     /**
+     * Gets the shard ID
+     * @return Number
+     */
+    Shard.prototype.id = function() {
+      return this._id;
+    };
+
+    /**
      * Checks is the current shard contains changed nodes
      * @return {Boolean}
      */

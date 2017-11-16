@@ -7,6 +7,7 @@
 declare module "grafine" {
     export class shard {
         constructor(db: graph, id: Number);
+        id(): Number;
         isChanged(): Boolean;
         getSize(): Number;
         export(): any;
@@ -19,6 +20,7 @@ declare module "grafine" {
     }
     export class index {
         constructor(db: graph, id: Number);
+        id(): Number;
         isChanged(): Boolean;
         getSize(): Number;
         export(): any;

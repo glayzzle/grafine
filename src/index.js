@@ -20,6 +20,14 @@ module.exports = function(grafine) {
     };
 
     /**
+     * Gets the index unique identifier
+     * @return Number
+     */
+    Index.prototype.id = function() {
+      return this._id;
+    };
+
+    /**
      * Check if current index contains changes
      * @return {Boolean}
      */
