@@ -1,3 +1,13 @@
+## [Version 1.2.0](https://github.com/glayzzle/grafine/releases/tag/v1.2.0) (2017-11-16)
+
+### New features
+
+- add a shard and index getter: [`d3278ca`](https://github.com/glayzzle/grafine/commit/d3278ca)
+- update docs: [`e8090f0`](https://github.com/glayzzle/grafine/commit/e8090f0)
+- release build: [`4a0394e`](https://github.com/glayzzle/grafine/commit/4a0394e)
+
+[...full changes](https://github.com/glayzzle/grafine/compare/v1.1.4...v1.2.0)
+
 ## [Version 1.1.4](https://github.com/glayzzle/grafine/releases/tag/v1.1.4) (2017-2-21)
 
 ### Minor Changes
