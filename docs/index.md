@@ -9,6 +9,12 @@ An index storage
 -   `db`  
 -   `id`  
 
+### id
+
+Gets the index unique identifier
+
+Returns **any** Number
+
 ### isChanged
 
 Check if current index contains changes

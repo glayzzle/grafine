@@ -9,6 +9,12 @@ A shard storage (contains a list of grouped points)
 -   `db`  
 -   `id`  
 
+### id
+
+Gets the shard ID
+
+Returns **any** Number
+
 ### isChanged
 
 Checks is the current shard contains changed nodes
