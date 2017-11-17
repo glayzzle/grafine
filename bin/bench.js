@@ -26,8 +26,8 @@ var last;
 var size = process.argv.length === 3 ? process.argv[2] : 40000;
 for(var i = 0; i < size; i++) {
     var node = db.create();
-    node.index('name', (i % 54321).toString(36));
-    node.index('type', (i % 12345).toString(36));
+    node.index('name', i % 30); // (i % 54321).toString(36));
+    node.index('type', i % 60); // (i % 12345).toString(36));
     if (i % 5 === 0) {
         if (last) {
             node.set('foo', last);
@@ -89,12 +89,24 @@ search = 10;
 records = 0;
 for(var i = 0; i < search; i++) {
     var found = db.search({
-        name: i % 30,
-        type: i % 60
+        name: i % 10,
+        type: i % 20
     });
     records += found.length;
 }
 elapsed_time('Found ' + records +  ' items', records);
+
+// searching tests
+search = 10;
+records = 0;
+for(var i = 0; i < search; i++) {
+    var found = db.search({
+        name: (i % 5) + '%',
+        type: (i % 20) + '~'
+    });
+    records += found.length;
+}
+elapsed_time('Begin with ' + records +  ' items', records);
 
 console.log('---------------------------');
 console.log('Estimated size', Math.round(
