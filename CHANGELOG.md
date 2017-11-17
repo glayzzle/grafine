@@ -1,3 +1,19 @@
+## [Version 2.0.0](https://github.com/glayzzle/grafine/releases/tag/v2.0.0) (2017-11-17)
+
+### Breaking changes
+
+- implement new filters: [`5ff7d9d`](https://github.com/glayzzle/grafine/commit/5ff7d9d)
+
+### New features
+
+- prepare release: [`512b005`](https://github.com/glayzzle/grafine/commit/512b005)
+
+### Bug fixes
+
+- improve bench: [`0c5851a`](https://github.com/glayzzle/grafine/commit/0c5851a)
+
+[...full changes](https://github.com/glayzzle/grafine/compare/v1.3.0...v2.0.0)
+
 ## [Version 1.3.0](https://github.com/glayzzle/grafine/releases/tag/v1.3.0) (2017-11-16)
 
 ### New features
