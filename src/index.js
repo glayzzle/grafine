@@ -149,6 +149,25 @@ module.exports = function(grafine) {
         return [];
     };
 
+
+    Index.prototype.filter = function(key, cb) {
+      var values = this._index.get(key);
+      if (values) {
+          var result = new Set();
+          values.forEach(function(indexes, name) {
+              if (indexes && cb(name.toString())) {
+                  for(var k = 0; k < indexes.length; k++) {
+                      result.add(indexes[k]);
+                  }
+              }
+          });
+          if (result.size > 0) {
+              return Array.from(result);
+          }
+      }
+      return [];
+    }
+
     /**
      * Iterate over a list of items
      */
