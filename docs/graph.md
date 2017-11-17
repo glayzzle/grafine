@@ -49,15 +49,6 @@ Retrieves an index shard from the specified key
 
 -   `key`  
 
-### readIndex
-
-Retrieves each index entry
-
-**Parameters**
-
--   `key`  
--   `cb`  
-
 ### index
 
 Retrieves an index shard from the specified key
@@ -121,6 +112,15 @@ Create a node
 **Parameters**
 
 -   `result`  
+
+### filter
+
+Retrieves each index entry
+
+**Parameters**
+
+-   `key`  
+-   `cb`  
 
 ### search
 

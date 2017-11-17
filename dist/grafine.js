@@ -1,4 +1,4 @@
-/*! grafine - BSD3 License - 2017-11-16 */
+/*! grafine - BSD3 License - 2017-11-17 */
 
 require=(function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 /*!
@@ -99,19 +99,6 @@ module.exports = function(grafine) {
             this._indexes[id] = this.createIndex(id);
         }
         return this._indexes[id];
-    };
-
-    /**
-     * Retrieves each index entry
-     */
-    Graph.prototype.readIndex = function(key, cb) {
-        for(var i = 0; i < this._hash; i++) {
-            if (!this._indexes[i]) {
-                this._indexes[i] = this.createIndex(i);
-            }
-            this._indexes[i].each(key, cb);
-        }
-        return this;
     };
 
     /**
@@ -238,40 +225,80 @@ module.exports = function(grafine) {
         return result;
     };
 
+        /**
+     * Retrieves each index entry
+     */
+    Graph.prototype.filter = function(key, cb) {
+      var result = new Set();
+      for(var i = 0; i < this._hash; i++) {
+          if (!this._indexes[i]) {
+              this._indexes[i] = this.createIndex(i);
+          }
+          var data = this._indexes[i].filter(key, cb);
+          for(var k = 0; k < data.length; k++) {
+              result.add(data[k]);
+          }
+      }
+      if (result.size > 0) {
+        return Array.from(result);
+      } else {
+        return [];
+      }
+  };
+
     /**
      * Proceed to a multicriteria search
      */
     Graph.prototype.search = function(criteria) {
-        var results = [];
-        // preparing results
+        var result;
         for(var k in criteria) {
             var check = criteria[k];
-            results.push(
-                this.getIndex(check).search(k, check)
-            );
-        }
-        if (results.length === 1) {
-            return results[0];
-        }
-        // intersect results (quick & dirty / may improve)
-        var data = [];
-        for(var s = 0; s < results.length; s++) {
-            var set = results[s];
-            for(var i = 0, size = set.length; i < size; i++) {
-                var miss = false;
-                var item = set[i];
-                if (!item) continue;
-                // scan other sets to check if exists
-                for(var j = 0; j < results.length; j++) {
-                    if (j !== s && results[j].indexOf(item) === -1) {
-                        miss = true;
-                        break;
-                    }
+            var joker = check[check.length - 1];
+            var set;
+            if (joker === '%' || joker === '~') {
+              check = check.substring(0, check.length - 1);
+              var insensitive = joker === '~';
+              if (insensitive) {
+                check = check.toLowerCase();
+              }
+              set = this.filter(k, function(name) {
+                  if (insensitive) {
+                      if (name.toLowerCase().startsWith(check)) {
+                          return true;
+                      }
+                  } else if (name.startsWith(check)) {
+                      return true;
+                  }
+                  return false;
+              });
+            } else {
+              set = this.getIndex(check).search(k, check);
+            }
+            
+            if (set.length > 0) {
+              if (result) {
+                var buffer = {};
+                var found = false;
+                for(var i = 0; i < set.length; i++) {
+                  var item = set[i];
+                  if (result[item]) {
+                    buffer[item] = true;
+                    found = true;
+                  }
                 }
-                if (!miss) data.push(item);
+                if (!found) return [];
+                result = buffer;
+              } else {
+                result = {};
+                for(var i = 0; i < set.length; i++) {
+                  result[set[i]] = true;
+                }
+              }
+            } else {
+              return [];
             }
         }
-        return data;
+        return Object.keys(result);
     };
 
     return Graph;
@@ -428,6 +455,25 @@ module.exports = function(grafine) {
         }
         return [];
     };
+
+
+    Index.prototype.filter = function(key, cb) {
+      var values = this._index.get(key);
+      if (values) {
+          var result = new Set();
+          values.forEach(function(indexes, name) {
+              if (indexes && cb(name.toString())) {
+                  for(var k = 0; k < indexes.length; k++) {
+                      result.add(indexes[k]);
+                  }
+              }
+          });
+          if (result.size > 0) {
+              return Array.from(result);
+          }
+      }
+      return [];
+    }
 
     /**
      * Iterate over a list of items
