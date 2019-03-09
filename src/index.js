@@ -155,7 +155,7 @@ module.exports = function(grafine) {
       if (values) {
           var result = new Set();
           values.forEach(function(indexes, name) {
-              if (indexes && cb(name.toString())) {
+              if (indexes && cb(name.toString(), indexes)) {
                   for(var k = 0; k < indexes.length; k++) {
                       result.add(indexes[k]);
                   }
