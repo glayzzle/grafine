@@ -295,7 +295,9 @@ module.exports = function(grafine) {
               return [];
             }
         }
-        return Object.keys(result);
+        return Object.keys(result).map(function(x) {
+            return Number.parseInt(x, 10);
+        });
     };
 
     return Graph;
