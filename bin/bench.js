@@ -8,6 +8,12 @@
 var grafine = require('../index');
 var db = new grafine.graph(255);
 
+var a = db.create();
+a.index('name', 'a');
+var aResult = db.search({
+    name: 'a'
+});
+
 var start = (new Date().getTime());
 var elapsed_time = function(note, counter){
     // divide by a million to get nano to milli
@@ -23,7 +29,7 @@ var elapsed_time = function(note, counter){
 
 // writing tests
 var last;
-var size = process.argv.length === 3 ? process.argv[2] : 40000;
+var size = process.argv.length === 3 ? process.argv[2] : 100000;
 for(var i = 0; i < size; i++) {
     var node = db.create();
     node.index('name', i % 30); // (i % 54321).toString(36));
