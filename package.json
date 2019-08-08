@@ -1,6 +1,6 @@
 {
   "name": "grafine",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "description": ":lollipop: A tiny nodejs/javascript in memory graph database",
   "main": "index.js",
   "scripts": {
